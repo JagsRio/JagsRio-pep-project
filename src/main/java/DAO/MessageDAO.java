@@ -1,8 +1,10 @@
-package Service;
-import java.util.*;
+package DAO;
+
+import java.util.List;
+
 import Model.Message;
 
-public interface MessageService {
+public interface MessageDAO {
     public abstract Message createMessage(String message_text, int posted_by, long timeposted);
     public abstract List<Message> getAllMessages();
     public abstract Message getMessageById(int msgId);

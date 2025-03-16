@@ -22,25 +22,46 @@ public class userDAOImpl implements UserDAO {
                 while (rs.next()){
                     createdAccountId = rs.getInt(1);
                 }
+                createdAccount.account_id=createdAccountId;
+                createdAccount.username=username;
+                createdAccount.password=password;
+                return createdAccount;
+            } else {
+                createdAccount = null;
+                return createdAccount;
             }
-            createdAccount.account_id=createdAccountId;
-            createdAccount.username=username;
-            createdAccount.password=password;
-            return createdAccount;
+            
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             createdAccount = null;
         }
         
         return createdAccount;
 
-    }
+    }  
 
     @Override
-    public int userLogin(Account userAccount) {
-        int accountId = -1;
+    public Account userLogin(String userName, String password) {
+        Account loggedInAccount = new Account();
+        
+        try (Connection conn = ConnectionUtil.getConnection()) {
+            String getAcct = "Select * from account where username=? and password=?";
+            PreparedStatement ps = conn.prepareStatement(getAcct);
+            ps.setString(1, userName);
+            ps.setString(2, password);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                loggedInAccount.setAccount_id(rs.getInt("account_id"));
+                loggedInAccount.setUsername(rs.getString("username"));
+                loggedInAccount.setPassword(rs.getString("password"));
+            }
+            return loggedInAccount;
 
-        return accountId;
+        } catch (SQLException e) {
+            loggedInAccount= null;
+        }
+
+        return loggedInAccount;
     }
     
 }
