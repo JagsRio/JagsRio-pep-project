@@ -3,7 +3,6 @@ package Controller;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
-
 import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,6 +32,7 @@ public class SocialMediaController {
         app.post("register", completeRegistratioHandler);
         app.post("messages", createNewMessageHandler);
         app.get("messages", getAllMessagesFromDBHandler);
+        app.get("messages/{message_id}", getMessageByMessageIDHandler);
         return app;
     }
     //long secondsSinceEpoch = System.currentTimeMillis();
@@ -93,6 +93,19 @@ public class SocialMediaController {
         allMessages = messageServiceImpl.getAllMessages();
         ctx.json(allMessages).status(200);
       
+    };
+
+    private static Handler getMessageByMessageIDHandler = ctx -> {
+        int messageId = Integer.parseInt(ctx.pathParam("message_id"));
+        Message msg = new Message();
+        MessageServiceImpl messageServiceImpl = new MessageServiceImpl();
+        msg = messageServiceImpl.getMessageById(messageId);
+        if ((msg == null) || (msg.message_id<=0)){
+            ctx.result("").status(200);
+        }
+        else{
+            ctx.json(msg).status(200);
+        }        
     };
 
 }

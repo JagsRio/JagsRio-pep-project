@@ -61,6 +61,7 @@ public class MessageDAOImpl implements MessageDAO {
             }
             return allMessages;
         } catch (Exception e) {
+            e.printStackTrace();
             allMessages = new ArrayList<>();
         }
 
@@ -69,6 +70,23 @@ public class MessageDAOImpl implements MessageDAO {
     
     public Message getMessageById(int msgId){
         Message msg = new Message();
+        try (Connection conn = ConnectionUtil.getConnection()) {
+            String getMsgSql = "Select * from Message where message_id=?";
+            PreparedStatement ps = conn.prepareStatement(getMsgSql);
+            ps.setInt(1, msgId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                msg.setMessage_id(rs.getInt("message_id"));
+                msg.setMessage_text(rs.getString("message_text"));
+                msg.setPosted_by(rs.getInt("posted_by"));
+                msg.setTime_posted_epoch(rs.getLong("time_posted_epoch"));
+            }
+            return msg;
+
+        } catch (SQLException e) {
+            msg = null;
+           e.printStackTrace();
+        }
 
         return msg;
     };
