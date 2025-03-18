@@ -3,6 +3,9 @@ package Controller;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+
+import static org.mockito.ArgumentMatchers.intThat;
+
 import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,6 +36,9 @@ public class SocialMediaController {
         app.post("messages", createNewMessageHandler);
         app.get("messages", getAllMessagesFromDBHandler);
         app.get("messages/{message_id}", getMessageByMessageIDHandler);
+        app.delete("messages/{message_id}", deleteMessageByMessageIDHandler);
+        app.patch("messages/{message_id}", updateMessageByMessageIDHandler);
+        app.get("accounts/{account_id}/messages", getAllMessagesByAccountFromDBHandler);
         return app;
     }
     //long secondsSinceEpoch = System.currentTimeMillis();
@@ -106,6 +112,45 @@ public class SocialMediaController {
         else{
             ctx.json(msg).status(200);
         }        
+    };
+
+    private static Handler deleteMessageByMessageIDHandler = ctx -> {
+        int messageId = Integer.parseInt(ctx.pathParam("message_id"));
+        Message msg = new Message();
+        MessageServiceImpl messageServiceImpl = new MessageServiceImpl();
+        msg = messageServiceImpl.getMessageById(messageId);
+        if ((msg == null) || (msg.message_id<=0)){
+            ctx.result("").status(200);
+        }
+        else{
+            ctx.json(msg).status(200);
+        }        
+    };
+
+    private static Handler updateMessageByMessageIDHandler = ctx -> {
+        String jsonMessage = ctx.body();
+        int messageId = Integer.parseInt(ctx.pathParam("message_id"));
+        Message msg = objMapper.readValue(jsonMessage, Message.class);
+        String message_text = msg.getMessage_text();
+
+        Message updatedMessage = new Message();
+        MessageServiceImpl messageServiceImpl = new MessageServiceImpl();
+        updatedMessage = messageServiceImpl.updateMessage(messageId, message_text);
+        if ((updatedMessage == null) || (updatedMessage.message_id<=0)){
+            ctx.status(400);
+        }
+        else{
+            ctx.json(updatedMessage).status(200);
+        }        
+    };
+
+    private static Handler getAllMessagesByAccountFromDBHandler = ctx-> {
+        List<Message> allMessages = new ArrayList<>();
+        int accountId = Integer.parseInt(ctx.pathParam("account_id"));
+        MessageServiceImpl messageServiceImpl = new MessageServiceImpl();
+        allMessages = messageServiceImpl.getAllMessagesByAccountId(accountId);
+        ctx.json(allMessages).status(200);
+      
     };
 
 }

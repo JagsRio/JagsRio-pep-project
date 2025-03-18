@@ -93,19 +93,68 @@ public class MessageDAOImpl implements MessageDAO {
     
     public Message deleteMessage(int msgId){
         Message msg = new Message();
+        try (Connection conn = ConnectionUtil.getConnection()){
+            msg = getMessageById(msgId);
+            if (msg != null){
+                String delQuery = "Delete * from Message where message_id=?";
+                PreparedStatement ps = conn.prepareStatement(delQuery);
+                ps.setInt(1, msgId);
+                int row = ps.executeUpdate();
+                if (row==1){
+                    return msg;
+                } else {
+                    msg=null;
+                }
+            } else {
+                msg = null;
+            }
+        } catch (SQLException e) {
+            msg = null;            
+        }
 
         return msg;
 
     };
     
-    public Message updateMessage(int msgId){
+    public Message updateMessage(int msgId, String message_text){
         Message msg = new Message();
-
+        try (Connection conn = ConnectionUtil.getConnection()){
+            String updateQuery = "Update Message set message_text=? where message_id=?";
+            PreparedStatement ps = conn.prepareStatement(updateQuery);
+            ps.setString(1, message_text);
+            ps.setInt(2, msgId);
+            int row = ps.executeUpdate();
+            if (row==1){
+                msg = getMessageById(msgId);
+            } else {
+                msg=null;
+            }
+        } catch (SQLException e) {
+            msg = null;            
+        }
         return msg;
     };
     
     public List<Message> getAllMessagesByAccountId(int accountId){
         List<Message> allMessages = new ArrayList<>();
+        try (Connection conn = ConnectionUtil.getConnection()) {
+            String allQry = "Select * from Message where posted_by=?";
+            PreparedStatement ps = conn.prepareStatement(allQry);
+            ps.setInt(1, accountId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                Message objMsg = new Message();
+                objMsg.setMessage_id(rs.getInt("message_id"));
+                objMsg.setMessage_text(rs.getString("message_text"));
+                objMsg.setPosted_by(rs.getInt("posted_by"));
+                objMsg.setTime_posted_epoch(rs.getLong("time_posted_epoch"));
+                allMessages.add(objMsg);
+            }
+            return allMessages;
+        } catch (Exception e) {
+            e.printStackTrace();
+            allMessages = new ArrayList<>();
+        }
         return allMessages;
     };
 }

@@ -7,6 +7,6 @@ public interface MessageService {
     public abstract List<Message> getAllMessages();
     public abstract Message getMessageById(int msgId);
     public abstract Message deleteMessage(int msgId);
-    public abstract Message updateMessage(int msgId);
+    public abstract Message updateMessage(int msgId, String message_text);
     public abstract List<Message> getAllMessagesByAccountId(int accountId);
 }

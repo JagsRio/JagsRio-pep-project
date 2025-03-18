@@ -43,19 +43,34 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Message deleteMessage(int msgId) {
-        Message msg = null;
+        Message msg = new Message();
+        if (msgId > 0){
+            msg = messageDAO.deleteMessage(msgId);
+        } else {
+            msg = null;
+        }
         return msg;
     }
 
     @Override
-    public Message updateMessage(int msgId) {
-        Message msg = null;
+    public Message updateMessage(int msgId, String message_text) {
+        Message msg = new Message();
+        if ((message_text.length()==0) || (message_text.length()>244)){
+            msg=null;
+            return msg;
+        }
+        if (msgId > 0){
+            msg = messageDAO.updateMessage(msgId, message_text);
+        } else {
+            msg = null;
+        }
         return msg;
     }
 
     @Override
     public List<Message> getAllMessagesByAccountId(int accountId) {
         List<Message> allMessages = new ArrayList<>();
+        allMessages = messageDAO.getAllMessagesByAccountId(accountId);
         return allMessages;
     }
 
